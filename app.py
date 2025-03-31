@@ -7,9 +7,10 @@ import re
 from dateutil import parser
 from mongo_config import collection,db,client
 from flask_cors import CORS
+
 app = Flask(__name__)
 CORS(app)
-app = Flask(__name__)
+
 
 @app.route('/')
 def index():
