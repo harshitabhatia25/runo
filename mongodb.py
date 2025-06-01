@@ -2,7 +2,7 @@ import json
 import pymongo
 
 # MongoDB Atlas Connection URI (Replace with your actual URI)
-MONGO_URI = "mongodb+srv://bhatiaharshita25:%40Mummy07@cluster0.wutsa1o.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+MONGO_URI = "mongodb://localhost:27017/"
 
 # Database and Collection Names
 DATABASE_NAME = "crm_db"  # Change this
