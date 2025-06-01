@@ -3,7 +3,7 @@ from datetime import datetime
 import pytz
 
 # Replace with your MongoDB Atlas connection string
-MONGO_URI = ""mongodb://localhost:27017/""
+MONGO_URI = "mongodb://localhost:27017/"
 
 client = MongoClient(MONGO_URI)
 db = client["crm_db"]  # Change to your actual database name
