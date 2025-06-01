@@ -7,7 +7,7 @@ MONGO_URI = ""mongodb://localhost:27017/""
 
 client = MongoClient(MONGO_URI)
 db = client["crm_db"]  # Change to your actual database name
-collection = db["appointments  # Change to your actual collection name
+collection = db["appointments"]  # Change to your actual collection name
 
 
 # Update all documents
