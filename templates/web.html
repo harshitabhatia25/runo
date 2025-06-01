@@ -5,40 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRM Appointments Query</title>
     <style>
-        /* Body Styling */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to right, #275484, #0c0c0cc1);
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
             margin: 0;
             padding: 0;
             color: #fff;
         }
 
-        /* Main Container */
         .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 3rem auto;
             background: #ffffff;
-            padding: 2rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
             color: #333;
+            animation: fadeIn 0.8s ease-in-out;
         }
 
-        /* Header Styling */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         h1 {
             text-align: center;
-            color: #333;
-            font-size: 2rem;
+            font-size: 2.2rem;
+            background: linear-gradient(to right, #007bff, #00c6ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         p {
             text-align: center;
             color: #555;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
-        /* Input Group Styling */
         .input-group {
             margin: 1.5rem 0;
         }
@@ -52,11 +56,12 @@
 
         textarea {
             width: 100%;
-            padding: 0.75rem;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+            padding: 0.8rem;
+            border: 2px solid #ccc;
+            border-radius: 10px;
             font-size: 1rem;
-            transition: border-color 0.3s;
+            transition: border 0.3s;
+            resize: vertical;
         }
 
         textarea:focus {
@@ -64,103 +69,153 @@
             outline: none;
         }
 
-        /* Button Styling */
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
         button {
-            display: block;
-            background-color: #007bff;
+            flex: 1;
+            background: #007bff;
             color: white;
             border: none;
             padding: 0.75rem;
             font-size: 1rem;
             cursor: pointer;
-            border-radius: 8px;
-            width: 100%;
+            border-radius: 10px;
             font-weight: bold;
-            transition: background-color 0.3s, transform 0.2s;
+            transition: background 0.3s, transform 0.2s;
         }
 
         button:hover {
-            background-color: #0056b3;
-            transform: translateY(-1px);
+            background: #0056b3;
+            transform: scale(1.02);
         }
 
         button:active {
-            transform: translateY(1px);
+            transform: scale(0.98);
         }
 
-        /* Response Section */
         .response {
             margin-top: 2rem;
             padding: 1.5rem;
-            background: #f0f4ff;
-            border: 1px solid #d3e2ff;
-            border-radius: 8px;
+            background: #f7faff;
+            border: 1px solid #dbeaff;
+            border-radius: 10px;
             color: #333;
-            font-size: 0.95rem;
-            overflow-x: auto;
+            display: none;
         }
 
-        h2 {
+        .response h2 {
+            margin-bottom: 0.8rem;
             color: #007bff;
-            margin-bottom: 0.5rem;
         }
 
         pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            background: #e6f7ff;
+            background: #eef7ff;
             padding: 1rem;
             border-radius: 8px;
+            font-size: 0.95rem;
             border: 1px solid #cce5ff;
+            white-space: pre-wrap;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0, 123, 255, 0.3);
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            margin-top: 1rem;
+            background: #ffe4e4;
+            border-left: 5px solid red;
+            color: #a00;
+            padding: 1rem;
+            border-radius: 8px;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>CRM Appointments Query</h1>
-        <p>Ask any question about your appointments, such as "Show missed appointments this week."</p>
+        <p>Ask anything like: <em>"Show confirmed appointments last week"</em></p>
         <div class="input-group">
             <label for="query-input">Your Query:</label>
             <textarea id="query-input" rows="3" placeholder="Type your query here..."></textarea>
         </div>
-        <button id="submit-button">Submit Query</button>
-        <div class="response" id="response-container" style="display: none;">
+        <div class="btn-group">
+            <button id="submit-button">Submit Query</button>
+            <button id="clear-button" style="background: #6c757d;">Clear</button>
+        </div>
+        <div class="spinner" id="spinner" style="display: none;"></div>
+        <div class="toast" id="toast"></div>
+        <div class="response" id="response-container">
             <h2>Response:</h2>
             <pre id="response-data"></pre>
         </div>
     </div>
 
     <script>
-        // JavaScript to handle the form submission
-        document.getElementById('submit-button').addEventListener('click', async () => {
-            const queryInput = document.getElementById('query-input').value.trim();
-            const responseContainer = document.getElementById('response-container');
-            const responseData = document.getElementById('response-data');
+        const submitBtn = document.getElementById('submit-button');
+        const clearBtn = document.getElementById('clear-button');
+        const spinner = document.getElementById('spinner');
+        const toast = document.getElementById('toast');
+        const responseContainer = document.getElementById('response-container');
+        const responseData = document.getElementById('response-data');
+        const queryInput = document.getElementById('query-input');
 
-            // Check if input is empty
-            if (!queryInput) {
-                alert('Please enter a query!');
+        submitBtn.addEventListener('click', async () => {
+            const query = queryInput.value.trim();
+            if (!query) {
+                showToast("Please enter a query.");
                 return;
             }
 
-            // Send POST request to the backend
+            spinner.style.display = 'inline-block';
+            responseContainer.style.display = 'none';
+            toast.style.display = 'none';
+
             try {
-                const response = await fetch('https://runo-3.onrender.com/query', {
+                const res = await fetch('https://runo-3.onrender.com/query', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ query: queryInput })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
                 });
 
-                const data = await response.json();
+                const data = await res.json();
+                responseData.textContent = JSON.stringify(data, null, 4);
                 responseContainer.style.display = 'block';
-                responseData.textContent = JSON.stringify(data, null, 4); // Pretty print JSON
-            } catch (error) {
-                responseContainer.style.display = 'block';
-                responseData.textContent = `Error: ${error.message}`;
+            } catch (err) {
+                showToast("Something went wrong. Please try again.");
+            } finally {
+                spinner.style.display = 'none';
             }
         });
+
+        clearBtn.addEventListener('click', () => {
+            queryInput.value = '';
+            responseData.textContent = '';
+            responseContainer.style.display = 'none';
+            toast.style.display = 'none';
+        });
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.style.display = 'block';
+        }
     </script>
 </body>
 </html>
