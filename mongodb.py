@@ -6,7 +6,7 @@ MONGO_URI = "mongodb+srv://bhatiaharshita25:%40Mummy07@cluster0.wutsa1o.mongodb.
 
 # Database and Collection Names
 DATABASE_NAME = "crm_db"  # Change this
-COLLECTION_NAME = "appointments"  # Change this
+COLLECTION_NAME = "collection"  # Change this
 
 # Load JSON data from file
 JSON_FILE_PATH = "appointments_sample.json"  # Change this
